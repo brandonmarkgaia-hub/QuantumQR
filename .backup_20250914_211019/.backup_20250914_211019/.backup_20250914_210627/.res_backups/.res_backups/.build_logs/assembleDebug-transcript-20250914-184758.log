@@ -1,0 +1,33 @@
+﻿**********************
+Windows PowerShell transcript start
+Start time: 20250914184758
+Username: LAPTOP-0AS8TI7G\nixie
+RunAs User: LAPTOP-0AS8TI7G\nixie
+Configuration Name: 
+Machine: LAPTOP-0AS8TI7G (Microsoft Windows NT 10.0.26100.0)
+Host Application: C:\WINDOWS\System32\WindowsPowerShell\v1.0\powershell.exe
+Process ID: 16440
+PSVersion: 5.1.26100.6584
+PSEdition: Desktop
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.26100.6584
+BuildVersion: 10.0.26100.6584
+CLRVersion: 4.0.30319.42000
+WSManStackVersion: 3.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+**********************
+PS C:\QRSanitized\QuantumQR> & $gw ':app:assembleDebug' '--no-daemon' '--stacktrace' '--console=rich'
+        at org.apache.groovy.parser.antlr4.AstBuilder.buildAST(AstBuilder.java:269)
+        at org.apache.groovy.parser.antlr4.Antlr4ParserPlugin.buildAST(Antlr4ParserPlugin.java:58)
+        at org.gradle.groovy.scripts.internal.DefaultScriptCompilationHandler.compileScript(DefaultScriptCompilationHand
+ler.java:164)
+        ... 231 more
+
+
+BUILD FAILED in 16s
+PS C:\QRSanitized\QuantumQR> $code = $LASTEXITCODE
+PS C:\QRSanitized\QuantumQR> Stop-Transcript | Out-Null
+**********************
+Windows PowerShell transcript end
+End time: 20250914184815
+**********************

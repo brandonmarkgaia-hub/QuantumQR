@@ -1,0 +1,43 @@
+package com.quantumqr.ui
+
+
+import com.quantumqr.R
+
+import android.view.LayoutInflater
+import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
+import androidx.recyclerview.widget.RecyclerView
+import com.quantumqr.data.Scan
+import com.quantumqr.databinding.ItemScanBinding
+
+class HistoryAdapter(
+    private val onOpen: (Scan) -> Unit,
+    private val onShare: (Scan) -> Unit
+) : ListAdapter<Scan, HistoryAdapter.VH>(DIFF) {
+
+    companion object {
+        val DIFF = object : DiffUtil.ItemCallback<Scan>() {
+            override fun areItemsTheSame(old: Scan, new: Scan) = old.id == new.id
+            override fun areContentsTheSame(old: Scan, new: Scan) = old == new
+        }
+    }
+
+    inner class VH(val b: ItemScanBinding) : RecyclerView.ViewHolder(b.root)
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
+        val b = ItemScanBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return VH(b)
+    }
+
+    override fun onBindViewHolder(holder: VH, position: Int) {
+        val s = getItem(position)
+        with(holder.b) {
+            tvContent.text = s.content
+            tvFormat.text = if (s.isUrl) "URL" else s.format
+            btnOpen.text = if (s.isUrl) "Open" else "Copy"
+            btnOpen.setOnClickListener { onOpen(s) }
+            btnShare.setOnClickListener { onShare(s) }
+        }
+    }
+}

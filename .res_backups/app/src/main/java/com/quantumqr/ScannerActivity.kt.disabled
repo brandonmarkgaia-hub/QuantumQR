@@ -1,0 +1,79 @@
+
+import com.quantumqr.R
+
+import android.content.Intent
+import android.os.Bundle
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
+import androidx.core.view.MenuProvider
+import androidx.lifecycle.Lifecycle
+
+class ScannerActivity : AppCompatActivity() {
+    private lateinit var binding: ActivityScannerBinding
+
+
+    private var torchOn = false
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        // Assumes you have activity_scanner.xml. If not, tell me the layout name.
+        binding = ActivityScannerBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        // Optional Toolbar (id = @id/toolbar) if present
+        val tbId = resources.getIdentifier("toolbar","id",packageName)
+        if (tbId != 0) {
+            findViewById<Toolbar?>(tbId)?.let { setSupportActionBar(it) }
+        }
+
+        // App bar actions via MenuProvider (avoids onCreateOptionsMenu/onOptionsItemSelected overrides)
+        addMenuProvider(object : MenuProvider {
+            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+                menuInflater.inflate(R.menu.menu_scanner, menu)
+                menu.findItem(R.id.action_torch)
+                    ?.setIcon(if (torchOn) R.drawable.ic_torch_on_24 else R.drawable.ic_torch_off_24)
+            }
+            override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+                return when (menuItem.itemId) {
+                    R.id.action_torch -> { toggleTorch(); true }
+                    R.id.action_history -> {
+                        // best-effort open HistoryActivity if present
+                        try {
+                            startActivity(Intent(this@ScannerActivity,
+                                Class.forName("com.quantumqr.ui.HistoryActivity")))
+                        } catch (_: Throwable) { }
+                        true
+                    }
+                    else -> false
+                }
+            }
+        }, this, Lifecycle.State.RESUMED)
+    }
+
+    private fun toggleTorch() {
+        torchOn = !torchOn
+        // Best-effort CameraX torch toggle via reflection (so we don't depend on your field names)
+        try {
+            val camField = this::class.java.declaredFields.firstOrNull {
+                it.name.contains("camera", ignoreCase = true) || it.name.contains("preview", ignoreCase = true)
+            }
+            camField?.isAccessible = true
+            val cam = camField?.get(this)
+            val ctrl = cam?.javaClass?.methods?.firstOrNull { it.name.equals("getCameraControl", true) }?.invoke(cam)
+            val en = ctrl?.javaClass?.methods?.firstOrNull {
+                it.name.equals("enableTorch", true) && it.parameterTypes.size==1
+            }
+            en?.invoke(ctrl, torchOn)
+        } catch (_: Throwable) { /* ignore */ }
+
+        // Update icon immediately if we have a toolbar menu
+        try {
+            val tb = findViewById<Toolbar?>(resources.getIdentifier("toolbar","id",packageName))
+            tb?.menu?.findItem(R.id.action_torch)
+              ?.setIcon(if (torchOn) R.drawable.ic_torch_on_24 else R.drawable.ic_torch_off_24)
+        } catch (_: Throwable) { }
+    }
+}

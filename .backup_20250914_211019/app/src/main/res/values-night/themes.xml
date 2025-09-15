@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- App theme must extend an AppCompat descendant -->
+    <style name="Theme.QuantumQR" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Optional polish -->
+        <item name="android:statusBarColor" tools:targetApi="l">?attr/colorSurface</item>
+        <item name="android:navigationBarColor" tools:targetApi="o_mr1">?attr/colorSurface</item>
+        <item name="android:forceDarkAllowed">true</item>
+    </style>
+</resources>

@@ -1,0 +1,48 @@
+package com.quantumqr.ui
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
+import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.RecyclerView
+import com.quantumqr.R
+
+class SwipeDecor(private val ctx: Context) : RecyclerView.ItemDecoration() {
+    private val paint = Paint().apply {
+        isAntiAlias = true
+        color = Color.parseColor("#D32F2F") // Material Red 700
+    }
+
+    override fun onDraw(c: Canvas, parent: RecyclerView, state: RecyclerView.State) {
+        val icon = ContextCompat.getDrawable(ctx, R.drawable.ic_bin_24) ?: return
+        val margin = dp(20)
+        for (i in 0 until parent.childCount) {
+            val child = parent.getChildAt(i)
+            val dX = child.translationX
+            if (dX == 0f) continue
+
+            if (dX > 0f) {
+                // Swiping right ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â draw on left
+                c.drawRect(
+                    child.left.toFloat(), child.top.toFloat(),
+                    child.left + dX, child.bottom.toFloat(), paint
+                )
+                val top = child.top + (child.height - icon.intrinsicHeight) / 2
+                val left = child.left + margin
+                icon.setBounds(left, top, left + icon.intrinsicWidth, top + icon.intrinsicHeight)
+                icon.draw(c)
+            } else {
+                // Swiping left ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â draw on right
+                c.drawRect(
+                    child.right + dX, child.top.toFloat(),
+                    child.right.toFloat(), child.bottom.toFloat(), paint
+                )
+                val top = child.top + (child.height - icon.intrinsicHeight) / 2
+                val right = child.right - margin
+                icon.setBounds(right - icon.intrinsicWidth, top, right, top + icon.intrinsicHeight)
+                icon.draw(c)
+            }
+        }
+    }
+
+    private fun dp(v: Int) = (v * ctx.resources.displayMetrics.density).toInt()
+}

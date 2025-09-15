@@ -1,0 +1,10 @@
+> Task :app:mergeDebugResources FAILED
+C:\Users\nixie\.gradle\caches\8.13\transforms\af26925a1286db7afd59de0e3fb603fa\transformed\jetified-zxing-android-embedded-4.3.0\res\values\values.xml:32:4: Failed to flatten XML for resource 'toast_cant_open' with error: Invalid unicode escape sequence in string
+C:\Users\nixie\.gradle\caches\8.13\transforms\af26925a1286db7afd59de0e3fb603fa\transformed\jetified-zxing-android-embedded-4.3.0\res\values\values.xml:32:4: string/toast_cant_open does not contain a valid string resource.
+FAILURE: Build failed with an exception.
+Execution failed for task ':app:mergeDebugResources'.
+> A failure occurred while executing com.android.build.gradle.internal.res.ResourceCompilerRunnable
+> Resource compilation failed (Failed to compile values resource file C:\QRSanitized\QuantumQR\app\build\intermediates\incremental\debug\mergeDebugResources\merged.dir\values\values.xml. Cause: java.lang.IllegalStateException: Can not extract resource from com.android.aaptcompiler.ParsedResource@7645ecb7.). Check logs for more details.
+BUILD FAILED in 20s
+> Resource compilation failed (Failed to compile values resource file C:\QRSanitized\QuantumQR\app\build\intermediates\incremental\debug\mergeDebugResources\merged.dir\values\values.xml. Cause: java.lang.IllegalStateException: Can not extract resource from com.android.aaptcompiler.ParsedResource@6e8c7f35.). Check logs for more details.
+BUILD FAILED in 7s
