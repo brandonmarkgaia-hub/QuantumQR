@@ -1,8 +1,6 @@
 package com.quantumqr.data
 
 
-import com.quantumqr.R
-
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 

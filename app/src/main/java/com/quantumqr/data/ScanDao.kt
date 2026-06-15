@@ -1,8 +1,6 @@
 package com.quantumqr.data
 
 
-import com.quantumqr.R
-
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query

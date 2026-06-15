@@ -1,8 +1,6 @@
 package com.quantumqr.data
 
 
-import com.quantumqr.R
-
 import android.content.Context
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow

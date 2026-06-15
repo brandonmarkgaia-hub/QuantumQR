@@ -30,10 +30,13 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
 import java.util.concurrent.Executors
+import androidx.camera.core.ExperimentalGetImage
+import kotlin.OptIn
 
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.barcode.BarcodeScanning
 
+@OptIn(ExperimentalGetImage::class)
 class ScannerActivity : ComponentActivity() {
 
 
@@ -108,13 +111,14 @@ class ScannerActivity : ComponentActivity() {
         else askPermission.launch(Manifest.permission.CAMERA)
     }
 
+    @OptIn(ExperimentalGetImage::class)
     private fun startCamera() {
         val providerFuture = ProcessCameraProvider.getInstance(this)
         providerFuture.addListener({
             val provider = providerFuture.get()
 
             val preview = Preview.Builder()
-                .setTargetRotation(previewView.display?.rotation ?: 0)
+                .setTargetRotation(previewView.display?.rotation ?: android.view.Surface.ROTATION_0)
                 .build().also { it.setSurfaceProvider(previewView.surfaceProvider) }
 
             val analysis = ImageAnalysis.Builder()
@@ -143,12 +147,12 @@ class ScannerActivity : ComponentActivity() {
             val selector = CameraSelector.DEFAULT_BACK_CAMERA
             try {
                 provider.unbindAll()
-                camera = provider.bindToLifecycle(this, selector, preview, analysis)
-            this.camera = camera
-            this.camera?.cameraInfo?.torchState?.observe(this) { state ->
-                torchOn = (state == TorchState.ON)
-                updateFlashUi(torchOn)
-            }
+                val cam = provider.bindToLifecycle(this, selector, preview, analysis)
+                this.camera = cam
+                cam.cameraInfo.torchState.observe(this) { state ->
+                    torchOn = (state == TorchState.ON)
+                    updateFlashUi(torchOn)
+                }
             } catch (t: Throwable) {
                 t.printStackTrace()
                 Toast.makeText(this, "Camera init failed: ${t.message}", Toast.LENGTH_LONG).show()

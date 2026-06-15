@@ -2,7 +2,7 @@ package com.quantumqr.ui
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.flow.first
-
+import kotlinx.coroutines.flow.collect
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -19,18 +19,14 @@ class HistoryActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
-        val __layoutId = resources.getIdentifier("activity_history","layout", packageName)
-        if (__layoutId != 0) setContentView(__layoutId)
-        val __rvId = resources.getIdentifier("recyclerView","id", packageName)
-        recyclerView = findViewById<RecyclerView>(__rvId)
-        recyclerView = findViewById(0)
-        recyclerView.layoutManager = LinearLayoutManager(this)
-binding = ActivityHistoryBinding.inflate(layoutInflater)
+        binding = ActivityHistoryBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        recyclerView = binding.recyclerView
+        recyclerView.layoutManager = LinearLayoutManager(this)
+
         adapter = HistoryAdapter()
-        binding.recyclerView.adapter = adapter
+        recyclerView.adapter = adapter
 
         ItemTouchHelper(
             SwipeDecor { position, _ ->
