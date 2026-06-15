@@ -9,7 +9,9 @@ import android.view.View
 import android.widget.*
 import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.lifecycle.lifecycleScope
 import androidx.camera.core.*
+import kotlinx.coroutines.launch
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
@@ -76,8 +78,8 @@ class ScannerActivity : ComponentActivity() {
             startActivity(Intent(this, com.quantumqr.QRGeneratorActivity::class.java))
         }
 
-        btnHistory.setOnClickListener { 
-            Toast.makeText(this, "History coming soon", Toast.LENGTH_SHORT).show() 
+        btnHistory.setOnClickListener {
+            startActivity(Intent(this, com.quantumqr.ui.HistoryActivity::class.java))
         }
 
         btnCopy.setOnClickListener {
@@ -166,6 +168,13 @@ class ScannerActivity : ComponentActivity() {
     private fun showResult(text: String) {
         txtResult.text = text
         resultCard.visibility = View.VISIBLE
+        
+        // Save to database
+        lifecycleScope.launch {
+            com.quantumqr.data.ScanRepository.get(this@ScannerActivity)
+                .add(text, "QR_CODE", text.startsWith("http"), System.currentTimeMillis())
+        }
+
         // Futuristic feel: Haptic feedback on scan
         val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as android.os.Vibrator
         vibrator.vibrate(50)

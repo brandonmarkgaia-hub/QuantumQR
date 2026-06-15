@@ -14,8 +14,10 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
 import com.quantumqr.databinding.ActivityQrGeneratorBinding
 import com.quantumqr.util.QRUtils
+import kotlinx.coroutines.launch
 import java.io.OutputStream
 
 class QRGeneratorActivity : AppCompatActivity() {
@@ -127,6 +129,12 @@ class QRGeneratorActivity : AppCompatActivity() {
             generatedQr = QRUtils.generateQRCode(content, 512, centerImg)
             binding.qrImage.setImageBitmap(generatedQr)
             binding.btnSave.visibility = View.VISIBLE
+            
+            // Save to history
+            lifecycleScope.launch {
+                com.quantumqr.data.ScanRepository.get(this@QRGeneratorActivity)
+                    .add(content, "GENERATED", content.startsWith("http"), System.currentTimeMillis())
+            }
         } catch (e: Exception) {
             Toast.makeText(this, "Error generating QR: ${e.message}", Toast.LENGTH_SHORT).show()
         }
