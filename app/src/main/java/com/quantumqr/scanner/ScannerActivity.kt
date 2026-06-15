@@ -16,6 +16,8 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
 import com.google.android.material.card.MaterialCardView
+import com.google.mlkit.vision.barcode.BarcodeScannerOptions
+import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.common.InputImage
 import com.quantumqr.R

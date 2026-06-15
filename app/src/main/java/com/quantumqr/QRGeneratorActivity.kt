@@ -102,9 +102,14 @@ class QRGeneratorActivity : AppCompatActivity() {
                 binding.etPassword.text.toString()
             )
             getString(R.string.type_vcard) -> QRUtils.createVCard(
-                binding.etName.text.toString(),
-                binding.etPhone.text.toString(),
-                binding.etEmail.text.toString()
+                name = binding.etName.text.toString(),
+                org = binding.etCompany.text.toString(),
+                title = binding.etJobTitle.text.toString(),
+                phone = binding.etPhone.text.toString(),
+                workPhone = binding.etWorkPhone.text.toString(),
+                email = binding.etEmail.text.toString(),
+                address = binding.etAddress.text.toString(),
+                url = binding.etWebsite.text.toString()
             )
             else -> ""
         }

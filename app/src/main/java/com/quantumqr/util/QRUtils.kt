@@ -44,14 +44,12 @@ object QRUtils {
         val canvas = Canvas(combined)
         canvas.drawBitmap(qrBitmap, 0f, 0f, null)
 
-        // Scale center image to 20% of QR size
         val logoSize = qrBitmap.width / 5
         val scaledLogo = Bitmap.createScaledBitmap(centerImage, logoSize, logoSize, true)
 
         val left = (qrBitmap.width - logoSize) / 2f
         val top = (qrBitmap.height - logoSize) / 2f
 
-        // Draw a white background for the logo to make it pop and preserve scannability
         val paint = Paint(Paint.ANTI_ALIAS_FLAG)
         paint.color = Color.WHITE
         val rect = RectF(left - 4, top - 4, left + logoSize + 4, top + logoSize + 4)
@@ -61,14 +59,33 @@ object QRUtils {
         return combined
     }
 
-    fun createVCard(name: String, phone: String, email: String, org: String = ""): String {
-        return "BEGIN:VCARD\n" +
-                "VERSION:3.0\n" +
-                "FN:$name\n" +
-                "ORG:$org\n" +
-                "TEL:$phone\n" +
-                "EMAIL:$email\n" +
-                "END:VCARD"
+    /**
+     * Creates a high-detail vCard v3.0 string.
+     * All parameters are optional to allow for flexible QR creation.
+     */
+    fun createVCard(
+        name: String,
+        org: String = "",
+        title: String = "",
+        phone: String = "",
+        workPhone: String = "",
+        email: String = "",
+        address: String = "",
+        url: String = ""
+    ): String {
+        return StringBuilder().apply {
+            append("BEGIN:VCARD\n")
+            append("VERSION:3.0\n")
+            if (name.isNotBlank()) append("FN:$name\n")
+            if (org.isNotBlank()) append("ORG:$org\n")
+            if (title.isNotBlank()) append("TITLE:$title\n")
+            if (phone.isNotBlank()) append("TEL;TYPE=CELL:$phone\n")
+            if (workPhone.isNotBlank()) append("TEL;TYPE=WORK:$workPhone\n")
+            if (email.isNotBlank()) append("EMAIL:$email\n")
+            if (address.isNotBlank()) append("ADR:;;$address\n")
+            if (url.isNotBlank()) append("URL:$url\n")
+            append("END:VCARD")
+        }.toString()
     }
 
     fun createWifi(ssid: String, password: String, encryption: String = "WPA"): String {
