@@ -1,5 +1,0 @@
-package com.quantumqr.data
-
-class ScanRepository(context: Context) {
-    fun history(): List<ScanItem> = emptyList()
-}
