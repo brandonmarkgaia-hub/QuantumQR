@@ -1,8 +1,33 @@
-﻿.gradle/
+# Gradle / build
+.gradle/
 **/build/
 **/out/
-local.properties
+build/
+
+# Android Studio / IntelliJ
 .idea/
 *.iml
 captures/
+.cxx/
+
+# Local config & secrets — never commit
+local.properties
+keystore.properties
+*.jks
+*.keystore
+
+# Backups & scratch (clean up the committed ones too)
 _backups/
+_res_backups/
+.backup_*/
+__backup_*/
+.code_backups/
+.gradle_backups/
+.res_backups/
+.build_logs/
+*.bak
+build.gradle.bak
+build_error_summary.txt
+
+# OS
+.DS_Store
