@@ -1,5 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- App brand color used by adaptive icons -->
-    <color name="brandPrimary">#2196F3</color>
+    <!-- Futuristic Vibrant Palette -->
+    <color name="brandPrimary">#00F2FF</color> <!-- Neon Cyan -->
+    <color name="brandSecondary">#7000FF</color> <!-- Deep Purple -->
+    <color name="neon_blue">#00E5FF</color>
+    <color name="neon_pink">#FF00E5</color>
+    <color name="scanner_reticle">#00F2FF</color>
+    <color name="scanner_mask">#CC000000</color>
+
+    <!-- Material 3 Overrides -->
+    <color name="primary">#00F2FF</color>
+    <color name="onPrimary">#000000</color>
+    <color name="secondary">#7000FF</color>
+    <color name="onSecondary">#FFFFFF</color>
+    <color name="surface">#0A0A0A</color>
+    <color name="onSurface">#F0F0F0</color>
 </resources>

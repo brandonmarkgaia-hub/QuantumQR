@@ -4,7 +4,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/root"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#000000">
 
     <androidx.camera.view.PreviewView
         android:id="@+id/previewView"
@@ -16,118 +17,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-        <View
-        android:id="@+id/viewfinder"
-        android:layout_width="280dp"
-        android:layout_height="280dp"
-        android:background="#40FFFFFF"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
-
-    <!-- Flash: top-right -->
-    <ImageButton
-        android:id="@+id/btnFlash"
-        android:layout_width="44dp"
-        android:layout_height="44dp"
-        android:layout_margin="16dp"
-        android:background="@android:color/transparent"
-        android:contentDescription="Flash"
-        android:src="@android:drawable/ic_menu_camera"
-        app:tint="@android:color/white"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
-
-    <!-- Settings: top-left (next to history) -->
-    <ImageButton
-        android:id="@+id/btnSettings"
-        android:layout_width="44dp"
-        android:layout_height="44dp"
-        android:layout_margin="16dp"
-        android:background="@android:color/transparent"
-        android:contentDescription="@string/settings_title"
-        android:src="@android:drawable/ic_menu_preferences"
-        app:tint="@android:color/white"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toEndOf="@id/btnHistory" />
-
-    <!-- Generate: top-right (next to flash) -->
-    <ImageButton
-        android:id="@+id/btnGoToGenerate"
-        android:layout_width="44dp"
-        android:layout_height="44dp"
-        android:layout_margin="16dp"
-        android:background="@android:color/transparent"
-        android:contentDescription="@string/generator_title"
-        android:src="@drawable/ic_export_24"
-        app:tint="@android:color/white"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/btnFlash" />
-
-    <!-- History: top-left -->
-    <ImageButton
-        android:id="@+id/btnHistory"
-        android:layout_width="44dp"
-        android:layout_height="44dp"
-        android:layout_margin="16dp"
-        android:background="@android:color/transparent"
-        android:contentDescription="History"
-        android:src="@android:drawable/ic_menu_recent_history"
-        app:tint="@android:color/white"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"/>
-
-    <!-- Bottom actions centered -->
-    <LinearLayout
-        android:id="@+id/bottomActions"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="20dp"
-        android:gravity="center"
-        android:orientation="horizontal"
-        android:padding="8dp"
-        android:background="@android:color/transparent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
-
-        <Button
-            android:id="@+id/btnCopy"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Copy" />
-
-        <Space android:layout_width="12dp" android:layout_height="1dp" />
-
-        <Button
-            android:id="@+id/btnShare"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Share" />
-
-        <Space android:layout_width="12dp" android:layout_height="1dp" />
-
-        <Button
-            android:id="@+id/btnOpen"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Open" />
-    </LinearLayout>
-
-    <TextView
-        android:id="@+id/txtResult"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:background="#80000000"
-        android:padding="10dp"
-        android:textColor="@android:color/white"
-        android:textSize="14sp"
-        android:visibility="gone"
-        app:layout_constraintBottom_toTopOf="@id/bottomActions"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+    <!-- Scanner Overlay (The Dimming and Reticle) -->
     <com.quantumqr.scanner.ViewfinderOverlay
         android:id="@+id/viewfinderOverlay"
         android:layout_width="0dp"
@@ -138,5 +28,133 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:clickable="false"
         android:focusable="false" />
+
+    <!-- Top Controls Container -->
+    <LinearLayout
+        android:id="@+id/topBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="12dp"
+        android:gravity="center_vertical"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageButton
+            android:id="@+id/btnHistory"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="History"
+            android:src="@drawable/ic_history_24"
+            app:tint="@color/neon_blue" />
+
+        <ImageButton
+            android:id="@+id/btnSettings"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="8dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/settings_title"
+            android:src="@android:drawable/ic_menu_preferences"
+            app:tint="@color/neon_blue" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
+
+        <ImageButton
+            android:id="@+id/btnGoToGenerate"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginEnd="8dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/generator_title"
+            android:src="@drawable/ic_export_24"
+            app:tint="@color/neon_pink" />
+
+        <ImageButton
+            android:id="@+id/btnFlash"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Flash"
+            android:src="@drawable/ico_torch"
+            app:tint="@color/neon_blue" />
+
+    </LinearLayout>
+
+    <!-- Scanning Result Area -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/resultCard"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="24dp"
+        android:visibility="gone"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="8dp"
+        app:cardBackgroundColor="#CC1A1A1A"
+        app:strokeColor="@color/neon_blue"
+        app:strokeWidth="1dp"
+        app:layout_constraintBottom_toTopOf="@id/bottomSpacer"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:id="@+id/txtResult"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                android:fontFamily="sans-serif-medium" />
+
+            <LinearLayout
+                android:id="@+id/bottomActions"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btnCopy"
+                    style="@style/Widget.Material3.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/action_copy"
+                    android:textColor="@color/neon_blue" />
+
+                <Button
+                    android:id="@+id/btnShare"
+                    style="@style/Widget.Material3.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/action_share"
+                    android:textColor="@color/neon_blue" />
+
+                <Button
+                    android:id="@+id/btnOpen"
+                    style="@style/Widget.Material3.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/action_open"
+                    android:textColor="@color/neon_pink" />
+            </LinearLayout>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- Invisible spacer for constraint when card is gone -->
+    <View
+        android:id="@+id/bottomSpacer"
+        android:layout_width="1dp"
+        android:layout_height="40dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
