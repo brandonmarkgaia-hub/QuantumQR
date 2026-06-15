@@ -15,4 +15,8 @@
     <color name="onSecondary">#FFFFFF</color>
     <color name="surface">#0A0A0A</color>
     <color name="onSurface">#F0F0F0</color>
+
+    <!-- Theme Presets -->
+    <color name="matrix_green">#00FF41</color>
+    <color name="cyber_purple">#BC00FF</color>
 </resources>

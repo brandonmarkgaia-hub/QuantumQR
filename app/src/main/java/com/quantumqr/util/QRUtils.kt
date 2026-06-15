@@ -107,4 +107,31 @@ object QRUtils {
     fun createGeo(lat: Double, lon: Double): String {
         return "geo:$lat,$lon"
     }
+
+    /**
+     * Generates a "Soundwave" style graphic. 
+     * In a real app, this would be based on the actual audio frequencies.
+     */
+    fun generateSoundwaveOverlay(width: Int, height: Int, color: Int): Bitmap {
+        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+        val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            this.color = color
+            this.strokeWidth = 8f
+            this.strokeCap = Paint.Cap.ROUND
+        }
+
+        val centerY = height / 2f
+        val step = 15f
+        val random = java.util.Random()
+
+        var x = 10f
+        while (x < width - 10f) {
+            val h = random.nextInt(height / 2).toFloat() + 20f
+            canvas.drawLine(x, centerY - h, x, centerY + h, paint)
+            x += step
+        }
+
+        return bitmap
+    }
 }

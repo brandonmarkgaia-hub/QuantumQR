@@ -3,24 +3,27 @@
 import android.Manifest
 import android.content.*
 import android.content.pm.PackageManager
+import android.media.AudioManager
+import android.media.ToneGenerator
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.widget.*
 import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.lifecycle.lifecycleScope
 import androidx.camera.core.*
-import kotlinx.coroutines.launch
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.card.MaterialCardView
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
-import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.barcode.BarcodeScanning
+import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
 import com.quantumqr.R
+import com.quantumqr.data.ScanRepository
+import kotlinx.coroutines.launch
 import java.util.concurrent.Executors
 
 @OptIn(ExperimentalGetImage::class)
@@ -31,6 +34,7 @@ class ScannerActivity : ComponentActivity() {
     private lateinit var btnHistory: ImageButton
     private lateinit var btnSettings: ImageButton
     private lateinit var btnGoToGenerate: ImageButton
+    private lateinit var btnGallery: ImageButton
     private lateinit var btnCopy: Button
     private lateinit var btnShare: Button
     private lateinit var btnOpen: Button
@@ -43,10 +47,17 @@ class ScannerActivity : ComponentActivity() {
     private var lastText: String? = null
     private var torchOn = false
 
+    // Sound generator for the "Futuristic Ping"
+    private val toneGenerator = ToneGenerator(AudioManager.STREAM_NOTIFICATION, 100)
+
     private val askPermission = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { granted ->
         if (granted) startCamera() else Toast.makeText(this, "Camera permission required", Toast.LENGTH_SHORT).show()
+    }
+
+    private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        uri?.let { decodeFromUri(it) }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -59,6 +70,7 @@ class ScannerActivity : ComponentActivity() {
         btnHistory = findViewById(R.id.btnHistory)
         btnSettings = findViewById(R.id.btnSettings)
         btnGoToGenerate = findViewById(R.id.btnGoToGenerate)
+        btnGallery = findViewById(R.id.btnGallery)
         btnCopy = findViewById(R.id.btnCopy)
         btnShare = findViewById(R.id.btnShare)
         btnOpen = findViewById(R.id.btnOpen)
@@ -84,12 +96,15 @@ class ScannerActivity : ComponentActivity() {
             startActivity(Intent(this, com.quantumqr.ui.HistoryActivity::class.java))
         }
 
+        btnGallery.setOnClickListener {
+            pickImageLauncher.launch("image/*")
+        }
+
         btnCopy.setOnClickListener {
             lastText?.let {
                 val cm = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                 cm.setPrimaryClip(ClipData.newPlainText("QR", it))
                 Toast.makeText(this, "Copied to clipboard", Toast.LENGTH_SHORT).show()
-                // Auto-hide card after copy? Optional.
             }
         }
 
@@ -128,6 +143,12 @@ class ScannerActivity : ComponentActivity() {
                 .setTargetRotation(previewView.display?.rotation ?: android.view.Surface.ROTATION_0)
                 .build().also { it.setSurfaceProvider(previewView.surfaceProvider) }
 
+            // Set up ML Kit to scan ALL formats (QR, Barcode, etc.)
+            val options = BarcodeScannerOptions.Builder()
+                .setBarcodeFormats(Barcode.FORMAT_ALL_FORMATS)
+                .build()
+            val scanner = BarcodeScanning.getClient(options)
+
             val analysis = ImageAnalysis.Builder()
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                 .build().also { ia ->
@@ -137,7 +158,7 @@ class ScannerActivity : ComponentActivity() {
                         busy = true
                         
                         val img = InputImage.fromMediaImage(media, proxy.imageInfo.rotationDegrees)
-                        BarcodeScanning.getClient().process(img)
+                        scanner.process(img)
                             .addOnSuccessListener { list ->
                                 val text = list.firstOrNull { !it.rawValue.isNullOrBlank() }?.rawValue
                                 if (!text.isNullOrBlank() && text != lastText) {
@@ -167,14 +188,38 @@ class ScannerActivity : ComponentActivity() {
         }, ContextCompat.getMainExecutor(this))
     }
 
+    private fun decodeFromUri(uri: Uri) {
+        try {
+            val img = InputImage.fromFilePath(this, uri)
+            val options = BarcodeScannerOptions.Builder()
+                .setBarcodeFormats(Barcode.FORMAT_ALL_FORMATS)
+                .build()
+            BarcodeScanning.getClient(options).process(img)
+                .addOnSuccessListener { list ->
+                    val text = list.firstOrNull { !it.rawValue.isNullOrBlank() }?.rawValue
+                    if (!text.isNullOrBlank()) {
+                        lastText = text
+                        showResult(text)
+                    } else {
+                        Toast.makeText(this, "No QR or barcode found in image", Toast.LENGTH_SHORT).show()
+                    }
+                }
+        } catch (e: Exception) {
+            Toast.makeText(this, "Failed to load image", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     private fun showResult(text: String) {
         txtResult.text = text
         resultCard.visibility = View.VISIBLE
         
+        // Futuristic Ping Sound
+        toneGenerator.startTone(ToneGenerator.TONE_PROP_BEEP2)
+
         // Save to database
         lifecycleScope.launch {
-            com.quantumqr.data.ScanRepository.get(this@ScannerActivity)
-                .add(text, "QR_CODE", text.startsWith("http"), System.currentTimeMillis())
+            ScanRepository.get(this@ScannerActivity)
+                .add(text, "SCAN", text.startsWith("http"), System.currentTimeMillis())
         }
 
         // Futuristic feel: Haptic feedback on scan
@@ -194,5 +239,6 @@ class ScannerActivity : ComponentActivity() {
     override fun onDestroy() {
         super.onDestroy()
         cameraExecutor.shutdown()
+        toneGenerator.release()
     }
 }

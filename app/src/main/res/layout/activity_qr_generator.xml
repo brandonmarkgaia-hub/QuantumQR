@@ -211,6 +211,41 @@
                         android:textColor="#FFFFFF" />
                 </com.google.android.material.textfield.TextInputLayout>
             </LinearLayout>
+
+            <!-- Voice/Sound input (Futuristic) -->
+            <LinearLayout
+                android:id="@+id/layoutVoice"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone"
+                android:padding="8dp"
+                android:gravity="center">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Soundwave Generator"
+                    android:textColor="@color/neon_pink"
+                    android:layout_marginBottom="8dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnRecord"
+                    style="@style/Widget.Material3.Button.TonalButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Record Voice"
+                    app:icon="@android:drawable/ic_btn_speak_now" />
+
+                <TextView
+                    android:id="@+id/txtRecordStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Not recording"
+                    android:textColor="#80FFFFFF"
+                    android:textSize="12sp"
+                    android:layout_marginTop="4dp" />
+            </LinearLayout>
         </LinearLayout>
 
         <com.google.android.material.materialswitch.MaterialSwitch

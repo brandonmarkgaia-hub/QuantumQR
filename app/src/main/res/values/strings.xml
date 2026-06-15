@@ -21,6 +21,7 @@
     <string name="type_text">Plain Text</string>
     <string name="type_wifi">WiFi</string>
     <string name="type_vcard">Contact Card</string>
+    <string name="type_voice">Voice Memo (Tattoo Style)</string>
     <string name="label_content">Content</string>
     <string name="label_name">Name</string>
     <string name="label_phone">Phone</string>

@@ -33,8 +33,46 @@
         android:id="@+id/swCopy"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="24dp"
         android:checked="true"
-        android:text="@string/settings_copy_label" />
+        android:text="@string/settings_copy_label"
+        android:textColor="#FFFFFF" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:text="App Theme"
+        android:textColor="@color/neon_blue"
+        android:fontFamily="sans-serif-medium" />
+
+    <RadioGroup
+        android:id="@+id/rgTheme"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <RadioButton
+            android:id="@+id/rbNeon"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Neon Cyan (Default)"
+            android:textColor="#FFFFFF"
+            android:checked="true" />
+
+        <RadioButton
+            android:id="@+id/rbPurple"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Cyber Purple"
+            android:textColor="#FFFFFF" />
+
+        <RadioButton
+            android:id="@+id/rbMatrix"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Matrix Green"
+            android:textColor="#FFFFFF" />
+    </RadioGroup>
 
 </LinearLayout>

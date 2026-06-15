@@ -1,9 +1,12 @@
 package com.quantumqr
 
+import android.Manifest
 import android.content.ContentValues
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
+import android.media.MediaRecorder
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -18,12 +21,17 @@ import androidx.lifecycle.lifecycleScope
 import com.quantumqr.databinding.ActivityQrGeneratorBinding
 import com.quantumqr.util.QRUtils
 import kotlinx.coroutines.launch
+import java.io.File
 import java.io.OutputStream
 
 class QRGeneratorActivity : AppCompatActivity() {
     private lateinit var binding: ActivityQrGeneratorBinding
     private var selectedPhoto: Bitmap? = null
     private var generatedQr: Bitmap? = null
+    
+    private var mediaRecorder: MediaRecorder? = null
+    private var audioFile: File? = null
+    private var isRecording = false
 
     private val pickPhotoLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         uri?.let {
@@ -32,6 +40,10 @@ class QRGeneratorActivity : AppCompatActivity() {
             selectedPhoto = bitmap
             Toast.makeText(this, "Photo selected", Toast.LENGTH_SHORT).show()
         }
+    }
+
+    private val requestAudioPermission = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        if (granted) startRecording() else Toast.makeText(this, "Audio permission needed", Toast.LENGTH_SHORT).show()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -53,13 +65,18 @@ class QRGeneratorActivity : AppCompatActivity() {
         binding.btnSave.setOnClickListener {
             saveToGallery()
         }
+
+        binding.btnRecord.setOnClickListener {
+            if (isRecording) stopRecording() else checkAudioPermission()
+        }
     }
 
     private fun setupTypeDropdown() {
         val types = arrayOf(
             getString(R.string.type_text),
             getString(R.string.type_wifi),
-            getString(R.string.type_vcard)
+            getString(R.string.type_vcard),
+            getString(R.string.type_voice)
         )
         val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, types)
         binding.typeDropdown.setAdapter(adapter)
@@ -74,6 +91,7 @@ class QRGeneratorActivity : AppCompatActivity() {
         binding.inputLayoutText.visibility = if (position == 0) View.VISIBLE else View.GONE
         binding.layoutWifi.visibility = if (position == 1) View.VISIBLE else View.GONE
         binding.layoutVcard.visibility = if (position == 2) View.VISIBLE else View.GONE
+        binding.layoutVoice.visibility = if (position == 3) View.VISIBLE else View.GONE
     }
 
     private fun setupSwitches() {
@@ -94,8 +112,43 @@ class QRGeneratorActivity : AppCompatActivity() {
         }
     }
 
+    private fun checkAudioPermission() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
+            startRecording()
+        } else {
+            requestAudioPermission.launch(Manifest.permission.RECORD_AUDIO)
+        }
+    }
+
+    private fun startRecording() {
+        audioFile = File(externalCacheDir, "temp_voice.m4a")
+        mediaRecorder = (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) MediaRecorder(this) else MediaRecorder()).apply {
+            setAudioSource(MediaRecorder.AudioSource.MIC)
+            setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
+            setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
+            setOutputFile(audioFile?.absolutePath)
+            prepare()
+            start()
+        }
+        isRecording = true
+        binding.btnRecord.text = "Stop Recording"
+        binding.txtRecordStatus.text = "Recording..."
+    }
+
+    private fun stopRecording() {
+        mediaRecorder?.apply {
+            stop()
+            release()
+        }
+        mediaRecorder = null
+        isRecording = false
+        binding.btnRecord.text = "Record Again"
+        binding.txtRecordStatus.text = "Voice clip saved!"
+    }
+
     private fun generateQR() {
-        val content = when (binding.typeDropdown.text.toString()) {
+        val type = binding.typeDropdown.text.toString()
+        val content = when (type) {
             getString(R.string.type_text) -> binding.etContent.text.toString()
             getString(R.string.type_wifi) -> QRUtils.createWifi(
                 binding.etSsid.text.toString(),
@@ -111,6 +164,7 @@ class QRGeneratorActivity : AppCompatActivity() {
                 address = binding.etAddress.text.toString(),
                 url = binding.etWebsite.text.toString()
             )
+            getString(R.string.type_voice) -> "VOICE_ID:${System.currentTimeMillis()}" // Placeholder for sound graph logic
             else -> ""
         }
 
@@ -131,18 +185,43 @@ class QRGeneratorActivity : AppCompatActivity() {
         }
 
         try {
-            generatedQr = QRUtils.generateQRCode(content, 512, centerImg)
+            if (type == getString(R.string.type_voice)) {
+                // Special Soundwave Tattoo generation
+                val baseQr = QRUtils.generateQRCode(content, 512, null)
+                val soundwave = QRUtils.generateSoundwaveOverlay(200, 200, ContextCompat.getColor(this, R.color.neon_pink))
+                generatedQr = addSoundwaveToQr(baseQr, soundwave)
+            } else {
+                generatedQr = QRUtils.generateQRCode(content, 512, centerImg)
+            }
+            
             binding.qrImage.setImageBitmap(generatedQr)
             binding.btnSave.visibility = View.VISIBLE
             
             // Save to history
             lifecycleScope.launch {
                 com.quantumqr.data.ScanRepository.get(this@QRGeneratorActivity)
-                    .add(content, "GENERATED", content.startsWith("http"), System.currentTimeMillis())
+                    .add(content, if (type == getString(R.string.type_voice)) "VOICE" else "GENERATED", content.startsWith("http"), System.currentTimeMillis())
             }
         } catch (e: Exception) {
             Toast.makeText(this, "Error generating QR: ${e.message}", Toast.LENGTH_SHORT).show()
         }
+    }
+
+    private fun addSoundwaveToQr(qr: Bitmap, soundwave: Bitmap): Bitmap {
+        val result = Bitmap.createBitmap(qr.width, qr.height, qr.config)
+        val canvas = Canvas(result)
+        canvas.drawBitmap(qr, 0f, 0f, null)
+        
+        // Place soundwave in the middle with a white backing
+        val left = (qr.width - soundwave.width) / 2f
+        val top = (qr.height - soundwave.height) / 2f
+        
+        val p = android.graphics.Paint()
+        p.color = android.graphics.Color.WHITE
+        canvas.drawRect(left - 10, top - 10, left + soundwave.width + 10, top + soundwave.height + 10, p)
+        canvas.drawBitmap(soundwave, left, top, null)
+        
+        return result
     }
 
     private fun getLogoBitmap(): Bitmap? {
