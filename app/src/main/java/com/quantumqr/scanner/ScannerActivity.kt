@@ -134,6 +134,15 @@ class ScannerActivity : ComponentActivity() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        findViewById<ViewfinderOverlay>(R.id.viewfinderOverlay).apply {
+            // Force a theme refresh
+            onAttachedToWindow()
+            invalidate()
+        }
+    }
+
     private fun startCamera() {
         val providerFuture = ProcessCameraProvider.getInstance(this)
         providerFuture.addListener({
