@@ -47,7 +47,6 @@ class ScannerActivity : ComponentActivity() {
     private var lastText: String? = null
     private var torchOn = false
 
-    // Sound generator for the "Futuristic Ping"
     private val toneGenerator = ToneGenerator(AudioManager.STREAM_NOTIFICATION, 100)
 
     private val askPermission = registerForActivityResult(
@@ -64,7 +63,6 @@ class ScannerActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_scanner)
 
-        // Initialize UI
         previewView = findViewById(R.id.previewView)
         btnFlash = findViewById(R.id.btnFlash)
         btnHistory = findViewById(R.id.btnHistory)
@@ -76,6 +74,8 @@ class ScannerActivity : ComponentActivity() {
         btnOpen = findViewById(R.id.btnOpen)
         txtResult = findViewById(R.id.txtResult)
         resultCard = findViewById(R.id.resultCard)
+
+        applyThemeUI()
 
         btnFlash.setOnClickListener {
             camera?.let { c ->
@@ -104,7 +104,7 @@ class ScannerActivity : ComponentActivity() {
             lastText?.let {
                 val cm = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                 cm.setPrimaryClip(ClipData.newPlainText("QR", it))
-                Toast.makeText(this, "Copied to clipboard", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Copied", Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -112,7 +112,7 @@ class ScannerActivity : ComponentActivity() {
             lastText?.let {
                 startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND).apply {
                     type = "text/plain"; putExtra(Intent.EXTRA_TEXT, it)
-                }, "Share Result"))
+                }, "Share"))
             }
         }
 
@@ -121,7 +121,7 @@ class ScannerActivity : ComponentActivity() {
                 try {
                     startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(it)))
                 } catch (_: Exception) {
-                    Toast.makeText(this, "Not a valid link", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Invalid link", Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -134,10 +134,43 @@ class ScannerActivity : ComponentActivity() {
         }
     }
 
+    private fun applyThemeUI() {
+        val prefs = getSharedPreferences("settings", Context.MODE_PRIVATE)
+        val theme = prefs.getString("app_theme", "NEON")
+        val mainColor = when(theme) {
+            "MATRIX" -> ContextCompat.getColor(this, R.color.matrix_green)
+            "PURPLE" -> ContextCompat.getColor(this, R.color.cyber_purple)
+            "VAPORWAVE" -> ContextCompat.getColor(this, R.color.vaporwave_pink)
+            "LUXURY" -> ContextCompat.getColor(this, R.color.luxury_gold)
+            "MIDNIGHT" -> ContextCompat.getColor(this, R.color.midnight_ruby)
+            "NORDIC" -> ContextCompat.getColor(this, R.color.nordic_ice)
+            "SYNTHWAVE" -> ContextCompat.getColor(this, R.color.synthwave_orange)
+            "GLITCH" -> ContextCompat.getColor(this, R.color.glitch_yellow)
+            "SAKURA" -> ContextCompat.getColor(this, R.color.sakura_pink)
+            else -> ContextCompat.getColor(this, R.color.neon_blue)
+        }
+        
+        val secondaryColor = if (theme == "VAPORWAVE") ContextCompat.getColor(this, R.color.vaporwave_blue) else mainColor
+
+        val tintList = android.content.res.ColorStateList.valueOf(mainColor)
+        val secondaryTintList = android.content.res.ColorStateList.valueOf(secondaryColor)
+
+        btnHistory.imageTintList = tintList
+        btnSettings.imageTintList = tintList
+        btnGallery.imageTintList = tintList
+        btnFlash.imageTintList = tintList
+        btnGoToGenerate.imageTintList = secondaryTintList
+        
+        resultCard.strokeColor = mainColor
+        btnCopy.setTextColor(mainColor)
+        btnShare.setTextColor(mainColor)
+        btnOpen.setTextColor(secondaryColor)
+    }
+
     override fun onResume() {
         super.onResume()
+        applyThemeUI()
         findViewById<ViewfinderOverlay>(R.id.viewfinderOverlay).apply {
-            // Force a theme refresh
             onAttachedToWindow()
             invalidate()
         }
@@ -152,7 +185,6 @@ class ScannerActivity : ComponentActivity() {
                 .setTargetRotation(previewView.display?.rotation ?: android.view.Surface.ROTATION_0)
                 .build().also { it.setSurfaceProvider(previewView.surfaceProvider) }
 
-            // Set up ML Kit to scan ALL formats (QR, Barcode, etc.)
             val options = BarcodeScannerOptions.Builder()
                 .setBarcodeFormats(Barcode.FORMAT_ALL_FORMATS)
                 .build()
@@ -192,7 +224,7 @@ class ScannerActivity : ComponentActivity() {
                     updateTorchUi(state == TorchState.ON)
                 }
             } catch (e: Exception) {
-                Toast.makeText(this, "Camera error: ${e.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Camera error", Toast.LENGTH_SHORT).show()
             }
         }, ContextCompat.getMainExecutor(this))
     }
@@ -210,28 +242,24 @@ class ScannerActivity : ComponentActivity() {
                         lastText = text
                         showResult(text)
                     } else {
-                        Toast.makeText(this, "No QR or barcode found in image", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, "No code found", Toast.LENGTH_SHORT).show()
                     }
                 }
         } catch (e: Exception) {
-            Toast.makeText(this, "Failed to load image", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Load failed", Toast.LENGTH_SHORT).show()
         }
     }
 
     private fun showResult(text: String) {
         txtResult.text = text
         resultCard.visibility = View.VISIBLE
-        
-        // Futuristic Ping Sound
         toneGenerator.startTone(ToneGenerator.TONE_PROP_BEEP2)
 
-        // Save to database
         lifecycleScope.launch {
             ScanRepository.get(this@ScannerActivity)
                 .add(text, "SCAN", text.startsWith("http"), System.currentTimeMillis())
         }
 
-        // Futuristic feel: Haptic feedback on scan
         val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as android.os.Vibrator
         vibrator.vibrate(50)
     }
@@ -239,10 +267,7 @@ class ScannerActivity : ComponentActivity() {
     private fun updateTorchUi(on: Boolean) {
         torchOn = on
         btnFlash.setImageResource(if (on) R.drawable.ic_torch_on_24 else R.drawable.ico_torch)
-        btnFlash.imageTintList = android.content.res.ColorStateList.valueOf(
-            if (on) ContextCompat.getColor(this, R.color.brandPrimary) 
-            else ContextCompat.getColor(this, R.color.neon_blue)
-        )
+        applyThemeUI() // Refresh tint
     }
 
     override fun onDestroy() {

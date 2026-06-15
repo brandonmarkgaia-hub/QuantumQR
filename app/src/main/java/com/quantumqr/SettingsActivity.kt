@@ -1,6 +1,7 @@
 package com.quantumqr
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -43,6 +44,13 @@ class SettingsActivity : AppCompatActivity() {
             check(when(savedTheme) {
                 "PURPLE" -> R.id.rbPurple
                 "MATRIX" -> R.id.rbMatrix
+                "VAPORWAVE" -> R.id.rbVaporwave
+                "LUXURY" -> R.id.rbLuxury
+                "MIDNIGHT" -> R.id.rbMidnight
+                "NORDIC" -> R.id.rbNordic
+                "SYNTHWAVE" -> R.id.rbSynthwave
+                "GLITCH" -> R.id.rbGlitch
+                "SAKURA" -> R.id.rbSakura
                 else -> R.id.rbNeon
             })
 
@@ -50,11 +58,28 @@ class SettingsActivity : AppCompatActivity() {
                 val theme = when(checkedId) {
                     R.id.rbPurple -> "PURPLE"
                     R.id.rbMatrix -> "MATRIX"
+                    R.id.rbVaporwave -> "VAPORWAVE"
+                    R.id.rbLuxury -> "LUXURY"
+                    R.id.rbMidnight -> "MIDNIGHT"
+                    R.id.rbNordic -> "NORDIC"
+                    R.id.rbSynthwave -> "SYNTHWAVE"
+                    R.id.rbGlitch -> "GLITCH"
+                    R.id.rbSakura -> "SAKURA"
                     else -> "NEON"
                 }
-                prefs.edit { putString("app_theme", theme) }
-                Toast.makeText(this@SettingsActivity, "Theme applied! Restart app for full effect.", Toast.LENGTH_SHORT).show()
+                
+                if (theme != savedTheme) {
+                    prefs.edit { putString("app_theme", theme) }
+                    restartApp()
+                }
             }
         }
+    }
+
+    private fun restartApp() {
+        val intent = packageManager.getLaunchIntentForPackage(packageName)
+        intent?.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+        startActivity(intent)
+        finishAffinity() // Closes all activities and restarts from fresh
     }
 }

@@ -2,6 +2,7 @@ package com.quantumqr
 
 import android.Manifest
 import android.content.ContentValues
+import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
@@ -53,6 +54,7 @@ class QRGeneratorActivity : AppCompatActivity() {
 
         setupTypeDropdown()
         setupSwitches()
+        applyThemeUI()
 
         binding.btnPickPhoto.setOnClickListener {
             pickPhotoLauncher.launch("image/*")
@@ -69,6 +71,30 @@ class QRGeneratorActivity : AppCompatActivity() {
         binding.btnRecord.setOnClickListener {
             if (isRecording) stopRecording() else checkAudioPermission()
         }
+    }
+
+    private fun applyThemeUI() {
+        val prefs = getSharedPreferences("settings", Context.MODE_PRIVATE)
+        val theme = prefs.getString("app_theme", "NEON")
+        val mainColor = when(theme) {
+            "MATRIX" -> ContextCompat.getColor(this, R.color.matrix_green)
+            "PURPLE" -> ContextCompat.getColor(this, R.color.cyber_purple)
+            "VAPORWAVE" -> ContextCompat.getColor(this, R.color.vaporwave_pink)
+            "LUXURY" -> ContextCompat.getColor(this, R.color.luxury_gold)
+            "MIDNIGHT" -> ContextCompat.getColor(this, R.color.midnight_ruby)
+            "NORDIC" -> ContextCompat.getColor(this, R.color.nordic_ice)
+            "SYNTHWAVE" -> ContextCompat.getColor(this, R.color.synthwave_orange)
+            "GLITCH" -> ContextCompat.getColor(this, R.color.glitch_yellow)
+            "SAKURA" -> ContextCompat.getColor(this, R.color.sakura_pink)
+            else -> ContextCompat.getColor(this, R.color.neon_blue)
+        }
+
+        val tintList = android.content.res.ColorStateList.valueOf(mainColor)
+        binding.btnGenerate.backgroundTintList = tintList
+        binding.btnPickPhoto.setTextColor(mainColor)
+        binding.btnPickPhoto.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null) // clear any potential icons
+        binding.swGenericLogo.thumbTintList = tintList
+        binding.swPersonalizedPhoto.thumbTintList = tintList
     }
 
     private fun setupTypeDropdown() {
@@ -164,7 +190,7 @@ class QRGeneratorActivity : AppCompatActivity() {
                 address = binding.etAddress.text.toString(),
                 url = binding.etWebsite.text.toString()
             )
-            getString(R.string.type_voice) -> "VOICE_ID:${System.currentTimeMillis()}" // Placeholder for sound graph logic
+            getString(R.string.type_voice) -> "VOICE_ID:${System.currentTimeMillis()}"
             else -> ""
         }
 
@@ -186,7 +212,6 @@ class QRGeneratorActivity : AppCompatActivity() {
 
         try {
             if (type == getString(R.string.type_voice)) {
-                // Special Soundwave Tattoo generation
                 val baseQr = QRUtils.generateQRCode(content, 512, null)
                 val soundwave = QRUtils.generateSoundwaveOverlay(200, 200, ContextCompat.getColor(this, R.color.neon_pink))
                 generatedQr = addSoundwaveToQr(baseQr, soundwave)
@@ -197,7 +222,6 @@ class QRGeneratorActivity : AppCompatActivity() {
             binding.qrImage.setImageBitmap(generatedQr)
             binding.btnSave.visibility = View.VISIBLE
             
-            // Save to history
             lifecycleScope.launch {
                 com.quantumqr.data.ScanRepository.get(this@QRGeneratorActivity)
                     .add(content, if (type == getString(R.string.type_voice)) "VOICE" else "GENERATED", content.startsWith("http"), System.currentTimeMillis())
@@ -212,7 +236,6 @@ class QRGeneratorActivity : AppCompatActivity() {
         val canvas = Canvas(result)
         canvas.drawBitmap(qr, 0f, 0f, null)
         
-        // Place soundwave in the middle with a white backing
         val left = (qr.width - soundwave.width) / 2f
         val top = (qr.height - soundwave.height) / 2f
         

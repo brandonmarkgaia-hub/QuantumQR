@@ -19,4 +19,20 @@
     <!-- Theme Presets -->
     <color name="matrix_green">#00FF41</color>
     <color name="cyber_purple">#BC00FF</color>
+
+    <!-- New 7 Themes -->
+    <color name="vaporwave_pink">#FF71CE</color>
+    <color name="vaporwave_blue">#01CDFE</color>
+
+    <color name="luxury_gold">#FFD700</color>
+
+    <color name="midnight_ruby">#E0115F</color>
+
+    <color name="nordic_ice">#88CCEE</color>
+
+    <color name="synthwave_orange">#FF8C00</color>
+
+    <color name="glitch_yellow">#FFFF00</color>
+
+    <color name="sakura_pink">#FFB7C5</color>
 </resources>

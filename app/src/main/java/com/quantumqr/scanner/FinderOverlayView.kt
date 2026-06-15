@@ -75,11 +75,23 @@ class ViewfinderOverlay @JvmOverloads constructor(
         val mainColor = when(currentTheme) {
             "MATRIX" -> "#00FF41".toColorInt()
             "PURPLE" -> "#BC00FF".toColorInt()
+            "VAPORWAVE" -> "#FF71CE".toColorInt()
+            "LUXURY" -> "#FFD700".toColorInt()
+            "MIDNIGHT" -> "#E0115F".toColorInt()
+            "NORDIC" -> "#88CCEE".toColorInt()
+            "SYNTHWAVE" -> "#FF8C00".toColorInt()
+            "GLITCH" -> "#FFFF00".toColorInt()
+            "SAKURA" -> "#FFB7C5".toColorInt()
             else -> "#00F2FF".toColorInt()
         }
         borderPaint.color = mainColor
         laserPaint.color = mainColor
         laserPaint.setShadowLayer(10f, 0f, 0f, mainColor)
+        
+        // Dynamic laser color for specific themes
+        if (currentTheme == "VAPORWAVE") {
+            laserPaint.color = "#01CDFE".toColorInt() // Teal laser for pink border
+        }
     }
 
     override fun onAttachedToWindow() {
@@ -131,27 +143,22 @@ class ViewfinderOverlay @JvmOverloads constructor(
     private fun drawMatrixRain(canvas: Canvas) {
         for (i in columns.indices) {
             val x = columnOffsets[i]
-            var y = columns[i].toFloat()
+            val y = columns[i].toFloat()
             
-            // Draw a string of random characters
             for (j in 0 until 10) {
                 val charY = y - (j * matrixPaint.textSize)
                 if (charY < 0) continue
                 if (charY > height) break
                 
-                // Only draw IF NOT inside the viewfinder box
                 if (!box.contains(x, charY)) {
                     val char = charArray[random.nextInt(charArray.size)]
-                    // Fade out the tail
                     matrixPaint.alpha = (255 * (1 - j / 10f)).toInt()
                     canvas.drawText(char.toString(), x, charY, matrixPaint)
                 }
             }
-            
-            // Update position
             columns[i] = (columns[i] + 15) % (height + 200)
         }
-        invalidate() // Keep the animation going
+        invalidate()
     }
 
     private fun drawCorners(canvas: Canvas) {
