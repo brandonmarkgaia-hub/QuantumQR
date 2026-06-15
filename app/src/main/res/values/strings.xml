@@ -14,4 +14,22 @@
     <string name="settings_tts_label">Speak results (TTS)</string>
     <string name="settings_vibrate_label">Vibrate on scan</string>
     <string name="settings_copy_label">Auto-copy to clipboard</string>
+
+    <!-- QR Generator -->
+    <string name="generator_title">Generate QR</string>
+    <string name="label_qr_type">QR Type</string>
+    <string name="type_text">Plain Text</string>
+    <string name="type_wifi">WiFi</string>
+    <string name="type_vcard">Contact Card</string>
+    <string name="label_content">Content</string>
+    <string name="label_name">Name</string>
+    <string name="label_phone">Phone</string>
+    <string name="label_email">Email</string>
+    <string name="label_ssid">Network Name (SSID)</string>
+    <string name="label_password">Password</string>
+    <string name="btn_generate">Generate</string>
+    <string name="mode_generic">Generic (with Logo)</string>
+    <string name="mode_personalized">Personalized (with Photo)</string>
+    <string name="btn_pick_photo">Pick Photo</string>
+    <string name="btn_save">Save to Gallery</string>
 </resources>

@@ -51,6 +51,7 @@ class ScannerActivity : ComponentActivity() {
     private lateinit var btnFlash: ImageButton
     private lateinit var btnHistory: ImageButton
     private lateinit var btnSettings: ImageButton
+    private lateinit var btnGoToGenerate: ImageButton
     private lateinit var btnCopy: Button
     private lateinit var btnShare: Button
     private lateinit var btnOpen: Button
@@ -75,6 +76,7 @@ class ScannerActivity : ComponentActivity() {
         btnFlash = findViewById(R.id.btnFlash)
         btnHistory = findViewById(R.id.btnHistory)
         btnSettings = findViewById(R.id.btnSettings)
+        btnGoToGenerate = findViewById(R.id.btnGoToGenerate)
         btnCopy = findViewById(R.id.btnCopy)
         btnShare = findViewById(R.id.btnShare)
         btnOpen = findViewById(R.id.btnOpen)
@@ -89,6 +91,9 @@ class ScannerActivity : ComponentActivity() {
         btnHistory.setOnClickListener { Toast.makeText(this, "History coming soon", Toast.LENGTH_SHORT).show() }
         btnSettings.setOnClickListener {
             startActivity(Intent(this, com.quantumqr.SettingsActivity::class.java))
+        }
+        btnGoToGenerate.setOnClickListener {
+            startActivity(Intent(this, com.quantumqr.QRGeneratorActivity::class.java))
         }
         btnCopy.setOnClickListener {
             lastText?.let {

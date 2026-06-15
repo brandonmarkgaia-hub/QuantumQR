@@ -1,22 +1,176 @@
 package com.quantumqr
 
-import android.graphics.Color
+import android.content.ContentValues
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.drawable.BitmapDrawable
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.provider.MediaStore
+import android.view.View
+import android.widget.ArrayAdapter
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.graphics.createBitmap
+import androidx.core.content.ContextCompat
 import com.quantumqr.databinding.ActivityQrGeneratorBinding
+import com.quantumqr.util.QRUtils
+import java.io.OutputStream
 
 class QRGeneratorActivity : AppCompatActivity() {
     private lateinit var binding: ActivityQrGeneratorBinding
+    private var selectedPhoto: Bitmap? = null
+    private var generatedQr: Bitmap? = null
+
+    private val pickPhotoLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        uri?.let {
+            val inputStream = contentResolver.openInputStream(it)
+            val bitmap = android.graphics.BitmapFactory.decodeStream(inputStream)
+            selectedPhoto = bitmap
+            Toast.makeText(this, "Photo selected", Toast.LENGTH_SHORT).show()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityQrGeneratorBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Compile-safe placeholder: a blank bitmap
-        val bmp = createBitmap(512, 512)
-        bmp.eraseColor(Color.WHITE)
-        binding.qrImage.setImageBitmap(bmp)
+        setupTypeDropdown()
+        setupSwitches()
+
+        binding.btnPickPhoto.setOnClickListener {
+            pickPhotoLauncher.launch("image/*")
+        }
+
+        binding.btnGenerate.setOnClickListener {
+            generateQR()
+        }
+
+        binding.btnSave.setOnClickListener {
+            saveToGallery()
+        }
+    }
+
+    private fun setupTypeDropdown() {
+        val types = arrayOf(
+            getString(R.string.type_text),
+            getString(R.string.type_wifi),
+            getString(R.string.type_vcard)
+        )
+        val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, types)
+        binding.typeDropdown.setAdapter(adapter)
+        binding.typeDropdown.setText(types[0], false)
+
+        binding.typeDropdown.setOnItemClickListener { _, _, position, _ ->
+            updateInputVisibility(position)
+        }
+    }
+
+    private fun updateInputVisibility(position: Int) {
+        binding.inputLayoutText.visibility = if (position == 0) View.VISIBLE else View.GONE
+        binding.layoutWifi.visibility = if (position == 1) View.VISIBLE else View.GONE
+        binding.layoutVcard.visibility = if (position == 2) View.VISIBLE else View.GONE
+    }
+
+    private fun setupSwitches() {
+        binding.swGenericLogo.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                binding.swPersonalizedPhoto.isChecked = false
+                binding.btnPickPhoto.visibility = View.GONE
+            }
+        }
+
+        binding.swPersonalizedPhoto.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                binding.swGenericLogo.isChecked = false
+                binding.btnPickPhoto.visibility = View.VISIBLE
+            } else {
+                binding.btnPickPhoto.visibility = View.GONE
+            }
+        }
+    }
+
+    private fun generateQR() {
+        val content = when (binding.typeDropdown.text.toString()) {
+            getString(R.string.type_text) -> binding.etContent.text.toString()
+            getString(R.string.type_wifi) -> QRUtils.createWifi(
+                binding.etSsid.text.toString(),
+                binding.etPassword.text.toString()
+            )
+            getString(R.string.type_vcard) -> QRUtils.createVCard(
+                binding.etName.text.toString(),
+                binding.etPhone.text.toString(),
+                binding.etEmail.text.toString()
+            )
+            else -> ""
+        }
+
+        if (content.isBlank()) {
+            Toast.makeText(this, "Please enter some content", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        var centerImg: Bitmap? = null
+        if (binding.swGenericLogo.isChecked) {
+            centerImg = getLogoBitmap()
+        } else if (binding.swPersonalizedPhoto.isChecked) {
+            centerImg = selectedPhoto
+            if (centerImg == null) {
+                Toast.makeText(this, "Please pick a photo first", Toast.LENGTH_SHORT).show()
+                return
+            }
+        }
+
+        try {
+            generatedQr = QRUtils.generateQRCode(content, 512, centerImg)
+            binding.qrImage.setImageBitmap(generatedQr)
+            binding.btnSave.visibility = View.VISIBLE
+        } catch (e: Exception) {
+            Toast.makeText(this, "Error generating QR: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun getLogoBitmap(): Bitmap? {
+        val drawable = ContextCompat.getDrawable(this, R.drawable.ic_logo_foreground) ?: return null
+        if (drawable is BitmapDrawable) return drawable.bitmap
+
+        val bitmap = Bitmap.createBitmap(
+            drawable.intrinsicWidth,
+            drawable.intrinsicHeight,
+            Bitmap.Config.ARGB_8888
+        )
+        val canvas = Canvas(bitmap)
+        drawable.setBounds(0, 0, canvas.width, canvas.height)
+        drawable.draw(canvas)
+        return bitmap
+    }
+
+    private fun saveToGallery() {
+        val bitmap = generatedQr ?: return
+        val filename = "QR_${System.currentTimeMillis()}.png"
+        var fos: OutputStream? = null
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            contentResolver?.also { resolver ->
+                val contentValues = ContentValues().apply {
+                    put(MediaStore.MediaColumns.DISPLAY_NAME, filename)
+                    put(MediaStore.MediaColumns.MIME_TYPE, "image/png")
+                    put(MediaStore.MediaColumns.RELATIVE_PATH, "Pictures/QuantumQR")
+                }
+                val imageUri: Uri? = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+                fos = imageUri?.let { resolver.openOutputStream(it) }
+            }
+        } else {
+            val imagesDir = android.os.Environment.getExternalStoragePublicDirectory(android.os.Environment.DIRECTORY_PICTURES).toString()
+            val image = java.io.File(imagesDir, filename)
+            fos = java.io.FileOutputStream(image)
+        }
+
+        fos?.use {
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
+            Toast.makeText(this, "Saved to Gallery", Toast.LENGTH_SHORT).show()
+        }
     }
 }
