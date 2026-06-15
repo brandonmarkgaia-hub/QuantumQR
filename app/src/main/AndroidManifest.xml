@@ -1,1 +1,42 @@
-<?xml version="1.0" encoding="utf-8"?><manifest xmlns:android="http://schemas.android.com/apk/res/android"><uses-permission android:name="android.permission.CAMERA" /><uses-permission android:name="android.permission.VIBRATE" /><uses-feature android:name="android.hardware.camera.any" android:required="false" /><application android:allowBackup="true" android:label="@string/app_name" android:supportsRtl="true" android:theme="@style/Theme.QuantumQR"><!-- New launcher --><!-- History screen --><activity android:name="com.quantumqr.ui.HistoryActivity" android:exported="false" /><activity android:name="com.quantumqr.debug.CameraSanityActivity" android:exported="true"><intent-filter><action android:name="android.intent.action.MAIN" /></intent-filter></activity><activity android:name="com.quantumqr.scanner.ScannerActivity" android:exported="true"><intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter></activity></application></manifest>
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+
+    <uses-feature android:name="android.hardware.camera.any" android:required="false" />
+
+    <application
+        android:allowBackup="true"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.QuantumQR">
+
+        <!-- Launcher / scanner -->
+        <activity
+            android:name="com.quantumqr.scanner.ScannerActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- QR generator -->
+        <activity
+            android:name="com.quantumqr.QRGeneratorActivity"
+            android:exported="false" />
+
+        <!-- Settings -->
+        <activity
+            android:name="com.quantumqr.SettingsActivity"
+            android:exported="false" />
+
+        <!-- History screen -->
+        <activity
+            android:name="com.quantumqr.ui.HistoryActivity"
+            android:exported="false" />
+
+    </application>
+</manifest>
+
